@@ -1,0 +1,55 @@
+/* Styles personnalisés en plus de Tailwind */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+    opacity: 0;
+}
+
+/* Styles additionnels pour l'interface */
+.task-card {
+    transition: transform 0.2s;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.high {
+    background-color: #FEE2E2;
+    color: #DC2626;
+}
+
+.status-badge.medium {
+    background-color: #FEF3C7;
+    color: #D97706;
+}
+
+.status-badge.low {
+    background-color: #ECFDF5;
+    color: #059669;
+}
+
+/* Animations pour les notifications */
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.notification {
+    animation: slideIn 0.3s ease-out forwards;
+}

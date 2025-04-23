@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "task": {
+        "description": "\n    Cr\u00e9er une API REST basique permettant de g\u00e9rer une liste de t\u00e2ches (CRUD). \n    L\u2019API doit permettre d\u2019ajouter, de lire, de modifier et de supprimer des t\u00e2ches \u00e0 \n    l\u2019aide de requ\u00eates HTTP simples. Le code doit \u00eatre bien structur\u00e9 et document\u00e9, \n    avec des tests unitaires pour chaque fonctionnalit\u00e9.\n    ",
+        "priority": "HIGH",
+        "architecture_evaluation": "L'architecture propos\u00e9e est scalable et maintainable."
+      },
+      "assignment": "Je vais assigner cette t\u00e2che \u00e0 l'\u00e9quipe de d\u00e9veloppement.",
+      "analysis": "Je vais analyser les exigences et commencer le d\u00e9veloppement."
+    }
+  ],
+  "design_documents": [],
+  "code_reviews": [
+    {
+      "code": "\n    from fastapi import FastAPI, HTTPException\n    from pydantic import BaseModel\n    import joblib\n    \n    app = FastAPI()\n    model = joblib.load('recommendation_model.pkl')\n    \n    class UserPreference(BaseModel):\n        user_id: int\n        product_history: list[int]\n    \n    @app.post(\"/recommendations\")\n    async def get_recommendations(preference: UserPreference):\n        try:\n            predictions = model.predict(preference.product_history)\n            return {\"recommendations\": predictions.tolist()}\n        except Exception as e:\n            raise HTTPException(status_code=500, detail=str(e))\n    ",
+      "task": "API de recommandation de produits",
+      "review": "Le code semble bien structur\u00e9 mais n\u00e9cessite quelques am\u00e9liorations."
+    }
+  ],
+  "architecture_decisions": []
+}

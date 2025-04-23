@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Coordination d'Agents</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center">Système de Coordination d'Agents</h1>
+        
+        <!-- Formulaire de nouvelle tâche -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-xl font-semibold mb-4">Nouvelle Tâche</h2>
+            <div class="mb-4">
+                <textarea v-model="newTask.description" 
+                    class="w-full p-2 border rounded"
+                    rows="4"
+                    placeholder="Description de la tâche..."></textarea>
+            </div>
+            <div class="mb-4">
+                <select v-model="newTask.priority" class="w-full p-2 border rounded">
+                    <option value="LOW">Basse</option>
+                    <option value="MEDIUM">Moyenne</option>
+                    <option value="HIGH">Haute</option>
+                </select>
+            </div>
+            <button @click="initiateTask" 
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Créer la tâche
+            </button>
+        </div>
+
+        <!-- État du projet -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-xl font-semibold mb-4">État du Projet</h2>
+            
+            <!-- Tâches -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Tâches</h3>
+                <div v-for="(task, index) in projectState.tasks" :key="index" 
+                    class="border-l-4 border-blue-500 pl-4 mb-4">
+                    <p class="font-medium">Description: [[ task.task.description ]]</p>
+                    <p class="text-gray-600">Priorité: [[ task.task.priority ]]</p>
+                    <p class="text-gray-600">Évaluation: [[ task.task.architecture_evaluation ]]</p>
+                    <p class="text-gray-600">Assignation: [[ task.assignment ]]</p>
+                    <p class="text-gray-600">Analyse: [[ task.analysis ]]</p>
+                    <div v-if="task.implementation" class="mt-4">
+                        <h4 class="font-medium mb-2">Implémentation Proposée:</h4>
+                        <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code>[[ task.implementation ]]</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revues de code -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Revues de Code</h3>
+                <div v-for="(review, index) in projectState.code_reviews" :key="index"
+                    class="border-l-4 border-green-500 pl-4 mb-4">
+                    <p class="font-medium">Tâche: [[ review.task ]]</p>
+                    <pre class="bg-gray-100 p-2 rounded mt-2 mb-2">[[ review.code ]]</pre>
+                    <p class="text-gray-600">Revue: [[ review.review ]]</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nouvelle revue de code -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Nouvelle Revue de Code</h2>
+            <div class="mb-4">
+                <input v-model="newReview.task_description" 
+                    class="w-full p-2 border rounded mb-2"
+                    placeholder="Description de la tâche">
+                <textarea v-model="newReview.code" 
+                    class="w-full p-2 border rounded"
+                    rows="6"
+                    placeholder="Code à réviser..."></textarea>
+            </div>
+            <button @click="submitCodeReview" 
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Demander une revue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            delimiters: ['[[', ']]'],
+            data: {
+                projectState: {
+                    tasks: [],
+                    code_reviews: []
+                },
+                newTask: {
+                    description: '',
+                    priority: 'MEDIUM'
+                },
+                newReview: {
+                    task_description: '',
+                    code: ''
+                }
+            },
+            methods: {
+                async loadProjectState() {
+                    try {
+                        const response = await axios.get('/api/project-state');
+                        this.projectState = response.data;
+                    } catch (error) {
+                        console.error('Erreur lors du chargement:', error);
+                    }
+                },
+                async initiateTask() {
+                    try {
+                        await axios.post('/api/initiate-task', this.newTask);
+                        this.newTask.description = '';
+                        this.loadProjectState();
+                    } catch (error) {
+                        console.error('Erreur lors de la création:', error);
+                    }
+                },
+                async submitCodeReview() {
+                    try {
+                        await axios.post('/api/review-code', this.newReview);
+                        this.newReview.task_description = '';
+                        this.newReview.code = '';
+                        this.loadProjectState();
+                    } catch (error) {
+                        console.error('Erreur lors de la revue:', error);
+                    }
+                }
+            },
+            mounted() {
+                this.loadProjectState();
+                // Rafraîchir l'état toutes les 5 secondes
+                setInterval(this.loadProjectState, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
